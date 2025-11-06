@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'screens/login_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +21,7 @@ class LibraryApp extends StatelessWidget {
     return MaterialApp(
       title: 'Library Book Manager',
       theme: ThemeData(primarySwatch: Colors.indigo),
-      home: const LibraryHomePage(),
+      home: const LoginPage(),
     );
   }
 }
