@@ -12,51 +12,50 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _loading = false;
-  String? _error;
+  bool _isLoading = false;
+  String? _errorMessage;
 
-  Future<void> _login() async {
+  Future<void> _loginUser() async {
     setState(() {
-      _loading = true;
-      _error = null;
+      _isLoading = true;
+      _errorMessage = null;
     });
 
     final email = _emailController.text.trim();
-    final password = _passwordController.text;
+    final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
       setState(() {
-        _error = 'Please provide both email and password.';
-        _loading = false;
+        _errorMessage = "Please enter both email and password.";
+        _isLoading = false;
       });
       return;
     }
 
     try {
-      final user = await FirestoreService().getUserByEmailAndPassword(
-        email,
-        password,
-      );
+      final user =
+          await FirestoreService().getUserByEmailAndPassword(email, password);
+
       if (user != null) {
-        // Navigate to dashboard
         if (!mounted) return;
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) =>
-                DashboardPage(userName: user['name'] ?? user['email'] ?? ''),
+            builder: (_) => DashboardPage(
+              userName: user['name'] ?? user['email'] ?? 'User',
+            ),
           ),
         );
       } else {
         setState(() {
-          _error = 'Invalid email or password.';
+          _errorMessage = "Invalid email or password.";
         });
       }
     } catch (e) {
       setState(() {
-        _error = 'Login failed: $e';
+        _errorMessage = "Login failed: $e";
       });
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -88,57 +87,75 @@ class _LoginPageState extends State<LoginPage> {
                   const FlutterLogo(size: 64),
                   const SizedBox(height: 12),
                   const Text(
-                    'Welcome back',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    "Welcome Back",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Sign in with your email and password',
+                    "Sign in with your registered email and password",
                     style: TextStyle(color: Colors.black54),
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
 
+                  // Email Input
                   TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email),
+                      labelText: "Email",
+                      prefixIcon: Icon(Icons.email_outlined),
                       border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 12),
+
+                  // Password Input
                   TextField(
                     controller: _passwordController,
                     obscureText: true,
                     decoration: const InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: Icon(Icons.lock),
+                      labelText: "Password",
+                      prefixIcon: Icon(Icons.lock_outline),
                       border: OutlineInputBorder(),
                     ),
-                    onSubmitted: (_) => _login(),
+                    onSubmitted: (_) => _loginUser(),
                   ),
 
-                  if (_error != null) ...[
+                  if (_errorMessage != null) ...[
                     const SizedBox(height: 12),
-                    Text(_error!, style: const TextStyle(color: Colors.red)),
+                    Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
                   ],
 
                   const SizedBox(height: 16),
+
+                  // Login Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _loading ? null : _login,
-                      child: _loading
+                      onPressed: _isLoading ? null : _loginUser,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: _isLoading
                           ? const SizedBox(
-                              height: 16,
-                              width: 16,
+                              height: 18,
+                              width: 18,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('Login'),
+                          : const Text("Login"),
                     ),
                   ),
                 ],
